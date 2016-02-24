@@ -1,10 +1,8 @@
-package gemuboi
+package main
 
 import (
 	"log"
 	"os"
-
-	_ "github.com/hajimehoshi/ebiten"
 )
 
 func parseArgs() string {
@@ -22,11 +20,12 @@ func parseArgs() string {
 func main() {
 	var Memory MemoryIO
 	var CPU LR35902
+	var PPU DMGPPU
 
-	if Memory.loadROM(parseArgs()) != nil {
+	if Memory.LoadROM(parseArgs()) != nil {
 		log.Fatal("ROM data failed to load")
 	}
 
-	CPU.Init(&Memory)
+	CPU.Init(&Memory, &PPU)
 	CPU.Run()
 }

@@ -1,6 +1,6 @@
-// gemuboi project doc.go
+// main project doc.go
 
 /*
-gemuboi document
+main document
 */
-package gemuboi
+package main

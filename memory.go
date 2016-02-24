@@ -1,11 +1,11 @@
-package gemuboi
+package main
 
 import (
 	"errors"
-	_ "fmt"
 	"io/ioutil"
 )
 
+// MemoryIO provides an emulated memory interface
 type MemoryIO struct {
 	ROM      []uint8
 	WRAM     [8192]uint8
@@ -14,7 +14,10 @@ type MemoryIO struct {
 	CRAMBank uint8
 }
 
-func (m *MemoryIO) loadROM(filename string) error {
+// LoadROM dumps the provided ROM into memory, sets some internal values (MBC,
+// RAM bank, ROM bank, etc). We want this data independent of the CPU in case of
+// soft reset
+func (m *MemoryIO) LoadROM(filename string) error {
 	var err error
 
 	m.ROM, err = ioutil.ReadFile(filename)
@@ -30,6 +33,7 @@ func (m *MemoryIO) loadROM(filename string) error {
 	return nil
 }
 
+// GetUint8 pulls a standard byte value from memory, by address
 func (m *MemoryIO) GetUint8(addr uint16) uint8 {
 	if addr >= 0x0000 && addr <= 0x3FFF {
 		// unbanked ROM (the first 16kb)
@@ -61,7 +65,8 @@ func (m *MemoryIO) GetUint8(addr uint16) uint8 {
 	return 0xFF
 }
 
+// GetUint16 pulls a 16-bit value from memory. Since this is little-endian,
+// swap the values to represent their logical value
 func (m *MemoryIO) GetUint16(addr uint16) uint16 {
-	// the GB is little-endian. make sure to swap the bytes
 	return (uint16(m.GetUint8(addr+1)) << 8) | uint16(m.GetUint8(addr))
 }
