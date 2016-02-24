@@ -1,4 +1,4 @@
-package gob
+package gemuboi
 
 import (
 	"errors"
