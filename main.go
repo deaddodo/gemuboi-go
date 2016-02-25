@@ -27,5 +27,5 @@ func main() {
 	}
 
 	CPU.Init(&Memory, &PPU)
-	CPU.Run()
+	CPU.Start()
 }

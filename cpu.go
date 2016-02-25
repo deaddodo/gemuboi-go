@@ -22,40 +22,25 @@ func (c *LR35902) Init(Memory *MemoryIO, PPU *DMGPPU) {
 	c.Reg.PC = 0x0000
 }
 
-func (c *LR35902) consumeUint8(addr uint16) uint8 {
+func (c *LR35902) consumeUint8() uint8 {
+	var rVal = c.Memory.GetUint8(c.Reg.PC)
 	c.Reg.PC++
-	return c.Memory.GetUint8(addr)
+	return rVal
 }
 
-func (c *LR35902) consumeUint16(addr uint16) uint16 {
+func (c *LR35902) consumeUint16() uint16 {
+	var rVal = c.Memory.GetUint16(c.Reg.PC)
 	c.Reg.PC += 2
-	return c.Memory.GetUint16(addr)
+	return rVal
 }
 
-func (c *LR35902) instructionDecode() {
-	for c.Running {
-		//fmt.Printf("Opcode: 0x%x", c.Memory.GetUint8(c.Reg.PC))
-		if c.Memory.GetUint8(c.Reg.PC) == 0x10 {
-			// STOP opcode
-			fmt.Println("STOP")
-			c.Running = false
-		}
-
-		/******************************** μOp table *******************************/
-		// Need to convert this from Rust gemuboi.
-		/******************************** μOp table *******************************/
-
-		c.Reg.PC++
-	}
-}
-
-// Run is the primary execute cycle for the emulator
+// Start spins up the execution cycle and deals with CPU/PPU sync
 // TODO: probably want to have the CPU/PPU be separate goroutines
 //       down the road and have them communicate through a channel
 //       on sync
-func (c *LR35902) Run() error {
+func (c *LR35902) Start() error {
 	fmt.Println("Beginning instruction cycle...")
-	c.instructionDecode()
+	c.InstructionDecode()
 	fmt.Println("Instructions exhausted.")
 
 	return nil
