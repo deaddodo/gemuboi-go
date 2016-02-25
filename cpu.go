@@ -6,18 +6,28 @@ type registers struct {
 	AF, BC, DE, HL, SP, PC uint16
 }
 
+type interrupt struct {
+	// STUB
+}
+
 // LR35902 represents the primary CPU interface for the GB/GBC.
 type LR35902 struct {
-	Memory  *MemoryIO
-	PPU     *DMGPPU
-	Reg     registers
-	Running bool
+	Memory                       *MemoryIO
+	PPU                          *DMGPPU
+	Reg                          registers
+	Interrupt                    interrupt
+	Running, Interrupted, Locked bool
 }
 
 // Init initializes the LR35902 to it's cold-boot state
 func (c *LR35902) Init(Memory *MemoryIO, PPU *DMGPPU) {
 	c.Memory = Memory
 	c.PPU = PPU
+
+	c.softReset()
+}
+
+func (c *LR35902) softReset() {
 	c.Running = true
 	c.Reg.PC = 0x0000
 }

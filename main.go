@@ -1,20 +1,25 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"os"
 )
 
-func parseArgs() string {
-	if len(os.Args) != 2 {
-		log.Fatal("File name necessary for ROM load")
-	} else {
-		if _, err := os.Stat(os.Args[1]); os.IsNotExist(err) {
-			log.Fatal("File provided does not exist")
-		}
+func parseArgs() (string, string) {
+	biosFile := flag.String("bios", "DMG_ROM.bin", "location of the GB BIOS file")
+	romFile := flag.String("rom", "file.gb", "location of the game ROM")
+	flag.Parse()
+
+	if _, err := os.Stat(*biosFile); os.IsNotExist(err) {
+		log.Fatal("BIOS provided does not exist")
 	}
 
-	return os.Args[1]
+	if _, err := os.Stat(*romFile); os.IsNotExist(err) {
+		log.Fatal("ROM provided does not exist")
+	}
+
+	return *biosFile, *romFile
 }
 
 func main() {
@@ -22,10 +27,7 @@ func main() {
 	var CPU LR35902
 	var PPU DMGPPU
 
-	if Memory.LoadROM(parseArgs()) != nil {
-		log.Fatal("ROM data failed to load")
-	}
-
+	Memory.Init(parseArgs())
 	CPU.Init(&Memory, &PPU)
 	CPU.Start()
 }
