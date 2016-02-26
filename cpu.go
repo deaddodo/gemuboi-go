@@ -2,8 +2,22 @@ package main
 
 import "fmt"
 
+type register struct {
+	hi, lo uint8
+}
+
+func (r *register) GetUint16() uint16 {
+	return (uint16(r.hi) << 8) | uint16(r.lo)
+}
+
+func (r *register) SetUint16(value uint16) {
+	r.lo = uint8(value)
+	r.hi = uint8(value >> 8)
+}
+
 type registers struct {
-	AF, BC, DE, HL, SP, PC uint16
+	AF, BC, DE, HL register
+	SP, PC         uint16
 }
 
 type interrupt struct {
@@ -51,7 +65,7 @@ func (c *LR35902) consumeUint16() uint16 {
 func (c *LR35902) Start() error {
 	fmt.Println("Beginning instruction cycle...")
 	c.InstructionDecode()
-	fmt.Println("Instructions exhausted.")
+	fmt.Println("Instructions cycle complete.")
 
 	return nil
 }

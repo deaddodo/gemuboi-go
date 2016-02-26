@@ -68,32 +68,39 @@ func (m *MemoryIO) readIO(addr uint8) uint8 {
 // GetUint8 pulls a standard byte value from memory, by address
 func (m *MemoryIO) GetUint8(addr uint16) uint8 {
 	switch {
-	case addr <= 0x3FFF: // unbanked ROM (the first 16kb)
+	case addr <= 0x3FFF:
 		if m.BIOSMode && (addr <= 0xFF) {
 			return m.BIOS[addr]
 		}
 		return m.ROM[addr]
-	case addr >= 0x4000 && addr <= 0x7FFF: // banked ROM (16kb+)
+	case addr >= 0x4000 && addr <= 0x7FFF:
 		return m.ROM[(uint32(addr)-0x4000)+(0x4000*uint32(m.ROMBank))]
-	case addr >= 0x8000 && addr <= 0x9FFF: // VRAM
-		return m.VRAM[addr-0x8000] // TODO: GBC offers a second bank. fix later
-	case addr >= 0xA000 && addr <= 0xBFFF: // banked cartridge RAM
+	case addr >= 0x8000 && addr <= 0x9FFF:
+		// TODO: GBC: Make Bankable (VRAM / Read)
+		return m.VRAM[addr-0x8000]
+	case addr >= 0xA000 && addr <= 0xBFFF:
+		// TODO: banked cartridge RAM (Read)
 		fallthrough
-	case addr >= 0xC000 && addr <= 0xCFFF: // Work RAM (unbanked)
+	case addr >= 0xC000 && addr <= 0xCFFF:
 		return m.WRAM[addr-0xC000]
-	case addr >= 0xD000 && addr <= 0xDFFF: // Work RAM (bankable)
-		return m.WRAM[addr-0xD000] // TODO: Classic GB does not bank, fix for GBC
-	case addr >= 0xE000 && addr <= 0xFDFF: // C000-DDFF mirror
+	case addr >= 0xD000 && addr <= 0xDFFF:
+		// TODO: GBC: Make Bankable (Work RAM / Read)
+		return m.WRAM[addr-0xD000]
+	case addr >= 0xE000 && addr <= 0xFDFF:
 		return m.GetUint8(addr - 0x2000)
-	case addr >= 0xFE00 && addr <= 0xFE9F: // OAM (sprite attributes)
+	case addr >= 0xFE00 && addr <= 0xFE9F:
+		// TODO: OAM (sprite attributes)
 		fallthrough
-	case addr >= 0xFEA0 && addr <= 0xFEFF: // unusable
+	case addr >= 0xFEA0 && addr <= 0xFEFF:
+		// TODO: unusable (read)
 		fallthrough
-	case addr >= 0xFF00 && addr <= 0xFF7F: // I/O Ports
+	case addr >= 0xFF00 && addr <= 0xFF7F:
 		return m.readIO((uint8(addr - 0xFF00)))
-	case addr >= 0xFF80 && addr <= 0xFFFE: // hRAM
+	case addr >= 0xFF80 && addr <= 0xFFFE:
+		// TODO: hRAM (Read)
 		fallthrough
-	default: // 0xFFFF: Interrupt Enable Register
+	default:
+		// TODO: 0xFFFF: Interrupt Enable Register (Read)
 		return 0xFF
 	}
 }
@@ -106,6 +113,38 @@ func (m *MemoryIO) GetUint16(addr uint16) uint16 {
 
 // SetUint8 set a memory address to a byte value
 func (m *MemoryIO) SetUint8(addr uint16, value uint8) {
+	switch {
+	case addr <= 0x7FFF:
+		// TODO: MBC control occurs in this range
+	case addr >= 0x8000 && addr <= 0x9FFF:
+		// TODO: GBC: Make Bankable (VRAM / Write)
+		m.VRAM[addr-0x8000] = value
+	case addr >= 0xA000 && addr <= 0xBFFF:
+		// TODO: banked cart RAM (possible external device / Write)
+		fallthrough
+	case addr >= 0xC000 && addr <= 0xCFFF:
+		m.WRAM[addr-0xC000] = value
+	case addr >= 0xD000 && addr <= 0xDFFF:
+		// TODO: GBC: Make Bankable (Work RAM / Write)
+		m.WRAM[addr-0xD000] = value
+	case addr >= 0xE000 && addr <= 0xFDFF:
+		// TODO: How does ECHO RAM handle writes?
+		//m.GetUint8(addr - 0x2000)
+	case addr >= 0xFE00 && addr <= 0xFE9F:
+		// TODO: OAM (sprite attributes)
+		fallthrough
+	case addr >= 0xFEA0 && addr <= 0xFEFF:
+		// TODO: How do writes to the unusable area work?
+		fallthrough
+	case addr >= 0xFF00 && addr <= 0xFF7F:
+		// TODO: I/O Ports (write)
+		// m.writeIO((uint8(addr - 0xFF00)))
+	case addr >= 0xFF80 && addr <= 0xFFFE:
+		// TODO: hRAM (Write)
+		fallthrough
+	default:
+		// TODO: 0xFFFF: Interrupt Enable Register (Write)
+	}
 }
 
 // SetUint16 set a memory address to a double-byte value
