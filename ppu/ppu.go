@@ -1,4 +1,4 @@
-package main
+package ppu
 
 import (
 	// will be used for video output
@@ -8,4 +8,9 @@ import (
 // DMGPPU handles video rendering
 type DMGPPU struct {
 	// STUB interface
+}
+
+// Init bootstraps the ppu
+func (ppu *DMGPPU) Init() {
+	// STUB
 }

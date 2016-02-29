@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"gemuboi-go/system"
 	"log"
 	"os"
 )
@@ -23,11 +24,8 @@ func parseArgs() (string, string) {
 }
 
 func main() {
-	var Memory MemoryIO
-	var CPU LR35902
-	var PPU DMGPPU
+	var System system.Bus
 
-	Memory.Init(parseArgs())
-	CPU.Init(&Memory, &PPU)
-	CPU.Start()
+	System.Init(parseArgs())
+	System.PowerOn()
 }

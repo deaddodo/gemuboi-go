@@ -1,12 +1,12 @@
-package main
+package memory
 
 import (
 	"errors"
 	"io/ioutil"
 )
 
-// MemoryIO provides an emulated memory interface
-type MemoryIO struct {
+// IO provides an emulated memory interface
+type IO struct {
 	ROM      []uint8
 	BIOS     []uint8
 	WRAM     [8192]uint8
@@ -20,7 +20,7 @@ type MemoryIO struct {
 // Init dumps the provided ROM into memory, sets some internal values (MBC,
 // RAM bank, ROM bank, etc). We want this data independent of the CPU in case of
 // soft reset
-func (m *MemoryIO) Init(biosFile string, romFile string) error {
+func (m *IO) Init(biosFile string, romFile string) error {
 	var err error
 
 	m.BIOS, err = ioutil.ReadFile(biosFile)
@@ -46,7 +46,7 @@ func (m *MemoryIO) Init(biosFile string, romFile string) error {
 	return nil
 }
 
-func (m *MemoryIO) readIO(addr uint8) uint8 {
+func (m *IO) readIO(addr uint8) uint8 {
 	switch addr {
 	case 0x00:
 		// joypad status
@@ -66,7 +66,7 @@ func (m *MemoryIO) readIO(addr uint8) uint8 {
 }
 
 // GetUint8 pulls a standard byte value from memory, by address
-func (m *MemoryIO) GetUint8(addr uint16) uint8 {
+func (m *IO) GetUint8(addr uint16) uint8 {
 	switch {
 	case addr <= 0x3FFF:
 		if m.BIOSMode && (addr <= 0xFF) {
@@ -107,12 +107,12 @@ func (m *MemoryIO) GetUint8(addr uint16) uint8 {
 
 // GetUint16 pulls a 16-bit value from memory. Since this is little-endian,
 // swap the values to represent their logical value (50h 01h -> 150h)
-func (m *MemoryIO) GetUint16(addr uint16) uint16 {
+func (m *IO) GetUint16(addr uint16) uint16 {
 	return (uint16(m.GetUint8(addr+1)) << 8) | uint16(m.GetUint8(addr))
 }
 
 // SetUint8 set a memory address to a byte value
-func (m *MemoryIO) SetUint8(addr uint16, value uint8) {
+func (m *IO) SetUint8(addr uint16, value uint8) {
 	switch {
 	case addr <= 0x7FFF:
 		// TODO: MBC control occurs in this range
@@ -148,7 +148,7 @@ func (m *MemoryIO) SetUint8(addr uint16, value uint8) {
 }
 
 // SetUint16 set a memory address to a double-byte value
-func (m *MemoryIO) SetUint16(addr uint16, value uint16) {
+func (m *IO) SetUint16(addr uint16, value uint16) {
 	m.SetUint8(addr+1, uint8(value))
 	m.SetUint8(addr, uint8(value>>8))
 }
